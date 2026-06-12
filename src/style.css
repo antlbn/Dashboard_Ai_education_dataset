@@ -2,13 +2,59 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-base:    #1e1e2e;
+  --bg-card:    #181825;
+  --bg-sidebar: #181825;
+  --border:     #313244;
+  --text:       #cdd6f4;
+  --text-muted: #585b70;
+  --text-faint: #45475a;
+  --accent:     #89b4fa;
+  --positive:   #a6e3a1;
+  --negative:   #f38ba8;
+  --warning:    #f9e2af;
+
+  /* chart palette */
+  --chart-bar:     rgba(137, 180, 250, 0.85);
+  --chart-grid:    #313244;
+  --chart-tick:    #585b70;
+  --chart-scatter: rgba(137, 180, 250, 0.4);
+  --chart-low:     #a6e3a1;
+  --chart-medium:  #f9e2af;
+  --chart-high:    #f38ba8;
+}
+
+:root.light {
+  --bg-base:    #f7f8fa;
+  --bg-card:    #ffffff;
+  --bg-sidebar: #f0f1f4;
+  --border:     #e2e4e9;
+  --text:       #1c1e26;
+  --text-muted: #8b8fa8;
+  --text-faint: #b0b3c6;
+  --accent:     #4f67e4;
+  --positive:   #8a9aaa;
+  --negative:   #9a8a8a;
+  --warning:    #aaaabc;
+
+  --chart-bar:     rgba(160, 160, 170, 0.75);
+  --chart-grid:    #e8e9ed;
+  --chart-tick:    #aaaabc;
+  --chart-scatter: rgba(140, 140, 155, 0.35);
+  --chart-low:     #b0b8c1;
+  --chart-medium:  #c8cdd4;
+  --chart-high:    #9aa0ab;
+}
+
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  background: #1e1e2e;
-  color: #cdd6f4;
+  background: var(--bg-base);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.2s, color 0.2s;
 }
 
 #app {

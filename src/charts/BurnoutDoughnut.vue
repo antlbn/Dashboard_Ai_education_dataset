@@ -2,15 +2,20 @@
 import { computed } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import { useFiltersStore } from '../stores/filtersStore'
+import { useThemeStore } from '../stores/themeStore'
+import { useChartColors } from './useChartColors'
 
 const filters = useFiltersStore()
+const theme = useThemeStore()
+const colors = useChartColors()
 
 const chartData = computed(() => {
+  void theme.isDark
   const students = filters.filteredStudents
   const total = students.length || 1
-  const low = students.filter(s => s.Burnout_Risk_Level === 'Low').length
+  const low    = students.filter(s => s.Burnout_Risk_Level === 'Low').length
   const medium = students.filter(s => s.Burnout_Risk_Level === 'Medium').length
-  const high = students.filter(s => s.Burnout_Risk_Level === 'High').length
+  const high   = students.filter(s => s.Burnout_Risk_Level === 'High').length
 
   return {
     labels: [
@@ -20,21 +25,24 @@ const chartData = computed(() => {
     ],
     datasets: [{
       data: [low, medium, high],
-      backgroundColor: ['#a6e3a1', '#f9e2af', '#f38ba8'],
+      backgroundColor: [colors.low, colors.medium, colors.high],
       borderWidth: 0,
     }],
   }
 })
 
-const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'bottom' as const,
-      labels: { color: '#cdd6f4', padding: 16 },
+const options = computed(() => {
+  void theme.isDark
+  return {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: { color: colors.tick, padding: 16 },
+      },
     },
-  },
-}
+  }
+})
 </script>
 
 <template>
@@ -46,16 +54,16 @@ const options = {
 
 <style scoped>
 .chart-card {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   padding: 1.25rem;
 }
 h3 {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #585b70;
+  color: var(--text-muted);
   margin: 0 0 1rem;
 }
 </style>

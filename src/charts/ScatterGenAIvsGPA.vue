@@ -2,70 +2,143 @@
 import { computed } from 'vue'
 import { Scatter } from 'vue-chartjs'
 import { useFiltersStore } from '../stores/filtersStore'
+import { useThemeStore } from '../stores/themeStore'
+import { useChartColors } from './useChartColors'
+import { linearRegression } from './useRegression'
 
 const filters = useFiltersStore()
+const theme = useThemeStore()
+const colors = useChartColors()
 
-// Sample max 500 points — scatter with 5000 is unreadable
 const chartData = computed(() => {
-  const sample = filters.filteredStudents.slice(0, 500)
-  return {
-    datasets: [{
+  void theme.isDark
+  const all = filters.filteredStudents
+  const sample = all.slice(0, 500)
+  const allPoints = all.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change }))
+
+  const reg = linearRegression(allPoints)
+
+  const datasets: any[] = [
+    {
       label: 'Студент',
       data: sample.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change })),
-      backgroundColor: 'rgba(137, 180, 250, 0.4)',
+      backgroundColor: colors.scatter,
       pointRadius: 3,
-    }],
+      order: 3,
+    },
+  ]
+
+  if (reg) {
+    const { upper, lower } = reg.confidenceBand()
+    const line = reg.regressionLine()
+
+    // upper CI boundary (fills down to lower)
+    datasets.push({
+      label: '95% CI',
+      data: upper,
+      borderColor: 'transparent',
+      backgroundColor: 'rgba(220, 50, 50, 0.1)',
+      pointRadius: 0,
+      showLine: true,
+      fill: '+1',
+      tension: 0.3,
+      order: 2,
+    })
+
+    // lower CI boundary
+    datasets.push({
+      label: '',
+      data: lower,
+      borderColor: 'transparent',
+      backgroundColor: 'transparent',
+      pointRadius: 0,
+      showLine: true,
+      fill: false,
+      tension: 0.3,
+      order: 2,
+    })
+
+    // regression line
+    datasets.push({
+      label: `Регрессия (slope=${reg.slope.toFixed(4)})`,
+      data: line,
+      borderColor: 'rgba(220, 50, 50, 0.85)',
+      backgroundColor: 'transparent',
+      pointRadius: 0,
+      showLine: true,
+      borderWidth: 2,
+      tension: 0,
+      order: 1,
+    })
   }
+
+  return { datasets }
 })
 
-const options = {
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      callbacks: {
-        label: (ctx: any) => `GenAI: ${ctx.parsed.x}h, ΔGPA: ${ctx.parsed.y.toFixed(2)}`,
+const options = computed(() => {
+  void theme.isDark
+  return {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          color: colors.tick,
+          filter: (item: any) => item.text !== '',
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            if (ctx.dataset.label === 'Студент')
+              return `GenAI: ${ctx.parsed.x}h, ΔGPA: ${ctx.parsed.y.toFixed(2)}`
+            return ctx.dataset.label || ''
+          },
+        },
       },
     },
-  },
-  scales: {
-    x: {
-      title: { display: true, text: 'GenAI часов/неделю', color: '#585b70' },
-      ticks: { color: '#585b70' },
-      grid: { color: '#313244' },
+    scales: {
+      x: {
+        title: { display: true, text: 'GenAI часов/неделю', color: colors.tick },
+        ticks: { color: colors.tick },
+        grid: { color: colors.grid },
+      },
+      y: {
+        title: { display: true, text: 'Изменение GPA', color: colors.tick },
+        ticks: { color: colors.tick },
+        grid: { color: colors.grid },
+      },
     },
-    y: {
-      title: { display: true, text: 'Изменение GPA', color: '#585b70' },
-      ticks: { color: '#585b70' },
-      grid: { color: '#313244' },
-    },
-  },
-}
+  }
+})
 </script>
 
 <template>
   <div class="chart-card">
-    <h3>GenAI часы vs изменение GPA <span class="note">(r ≈ −0.05, связь незначима)</span></h3>
+    <h3>
+      GenAI часы vs изменение GPA
+      <span class="note">(r ≈ −0.05, связь незначима)</span>
+    </h3>
     <Scatter :data="chartData" :options="options" />
   </div>
 </template>
 
 <style scoped>
 .chart-card {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   padding: 1.25rem;
 }
 h3 {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #585b70;
+  color: var(--text-muted);
   margin: 0 0 1rem;
 }
 .note {
-  color: #45475a;
+  color: var(--text-faint);
   text-transform: none;
   letter-spacing: 0;
 }

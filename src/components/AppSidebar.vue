@@ -50,8 +50,8 @@ const yearOptions: Array<{ label: string; value: Student['Year_of_Study'] | null
 <style scoped>
 .app-sidebar {
   grid-area: sidebar;
-  background: #181825;
-  border-right: 1px solid #313244;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   padding: 1.25rem 1rem;
   display: flex;
   flex-direction: column;
@@ -68,14 +68,14 @@ label {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #585b70;
+  color: var(--text-muted);
 }
 
 select {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  border-radius: 6px;
-  color: #cdd6f4;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
   padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
   cursor: pointer;
@@ -83,15 +83,15 @@ select {
 }
 
 select:focus {
-  border-color: #89b4fa;
+  border-color: var(--accent);
 }
 
 .reset-btn {
   margin-top: auto;
   background: transparent;
-  border: 1px solid #313244;
-  border-radius: 6px;
-  color: #585b70;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
   padding: 0.4rem;
   font-size: 0.8rem;
   cursor: pointer;
@@ -99,7 +99,7 @@ select:focus {
 }
 
 .reset-btn:hover {
-  border-color: #f38ba8;
-  color: #f38ba8;
+  border-color: var(--negative);
+  color: var(--negative);
 }
 </style>

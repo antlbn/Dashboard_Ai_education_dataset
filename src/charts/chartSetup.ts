@@ -11,6 +11,7 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js'
 
 Chart.register(
@@ -25,4 +26,5 @@ Chart.register(
   LinearScale,
   Tooltip,
   Legend,
+  Filler,
 )

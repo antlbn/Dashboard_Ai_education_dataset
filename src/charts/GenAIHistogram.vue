@@ -2,10 +2,15 @@
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
 import { useFiltersStore } from '../stores/filtersStore'
+import { useThemeStore } from '../stores/themeStore'
+import { useChartColors } from './useChartColors'
 
 const filters = useFiltersStore()
+const theme = useThemeStore()
+const colors = useChartColors()
 
 const chartData = computed(() => {
+  void theme.isDark
   const bins = Array(10).fill(0)
   for (const s of filters.filteredStudents) {
     const idx = Math.min(Math.floor(s.Weekly_GenAI_Hours / 2), 9)
@@ -16,20 +21,23 @@ const chartData = computed(() => {
     datasets: [{
       label: 'Студентов',
       data: bins,
-      backgroundColor: '#89b4fa',
-      borderRadius: 4,
+      backgroundColor: colors.bar,
+      borderRadius: 2,
     }],
   }
 })
 
-const options = {
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { ticks: { color: '#585b70' }, grid: { color: '#313244' } },
-    y: { ticks: { color: '#585b70' }, grid: { color: '#313244' } },
-  },
-}
+const options = computed(() => {
+  void theme.isDark
+  return {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: colors.tick }, grid: { color: colors.grid } },
+      y: { ticks: { color: colors.tick }, grid: { color: colors.grid } },
+    },
+  }
+})
 </script>
 
 <template>
@@ -41,16 +49,16 @@ const options = {
 
 <style scoped>
 .chart-card {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   padding: 1.25rem;
 }
 h3 {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #585b70;
+  color: var(--text-muted);
   margin: 0 0 1rem;
 }
 </style>
