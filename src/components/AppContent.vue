@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useFiltersStore } from '../stores/filtersStore'
+import '../charts/chartSetup'
+import GenAIHistogram from '../charts/GenAIHistogram.vue'
+import GPAChangeByMajor from '../charts/GPAChangeByMajor.vue'
+import ScatterGenAIvsGPA from '../charts/ScatterGenAIvsGPA.vue'
+import BurnoutDoughnut from '../charts/BurnoutDoughnut.vue'
 
 const filters = useFiltersStore()
-
 const students = computed(() => filters.filteredStudents)
 
 const avgPostGPA = computed(() => {
@@ -39,13 +43,11 @@ const burnoutHighPct = computed(() => {
         <span class="kpi-value">{{ avgPostGPA }}</span>
         <span class="kpi-sub">из 4.0</span>
       </div>
-
       <div class="kpi-card">
         <span class="kpi-label">GenAI часов/неделю</span>
         <span class="kpi-value">{{ avgGenAIHours }}</span>
         <span class="kpi-sub">среднее</span>
       </div>
-
       <div class="kpi-card">
         <span class="kpi-label">Изменение GPA</span>
         <span class="kpi-value" :class="Number(avgGPAChange) >= 0 ? 'positive' : 'negative'">
@@ -53,12 +55,18 @@ const burnoutHighPct = computed(() => {
         </span>
         <span class="kpi-sub">Post − Pre</span>
       </div>
-
       <div class="kpi-card">
         <span class="kpi-label">Burnout High</span>
         <span class="kpi-value">{{ burnoutHighPct }}%</span>
         <span class="kpi-sub">от выборки</span>
       </div>
+    </div>
+
+    <div class="charts-grid">
+      <GenAIHistogram />
+      <GPAChangeByMajor />
+      <ScatterGenAIvsGPA />
+      <BurnoutDoughnut />
     </div>
 
     <p class="count">Студентов в выборке: {{ students.length }}</p>
@@ -77,6 +85,7 @@ const burnoutHighPct = computed(() => {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .kpi-card {
@@ -109,6 +118,12 @@ const burnoutHighPct = computed(() => {
 .kpi-sub {
   font-size: 0.75rem;
   color: #45475a;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .count {
