@@ -3,12 +3,10 @@ import { onMounted } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import AppContent from './components/AppContent.vue'
-import { loadStudents } from './api/loadData'
+import { useDataStore } from './stores/dataStore'
 
-onMounted(async () => {
-  const students = await loadStudents()
-  console.log(`Loaded ${students.length} students`, students[0])
-})
+const dataStore = useDataStore()
+onMounted(() => dataStore.load())
 </script>
 
 <template>
