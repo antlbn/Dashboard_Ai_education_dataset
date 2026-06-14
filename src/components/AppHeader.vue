@@ -10,6 +10,7 @@ const ui = useUiStore()
 const tabs: Array<{ label: string; value: ActiveView }> = [
   { label: 'Обзор', value: 'overview' },
   { label: 'Распределения', value: 'distributions' },
+  { label: 'Table', value: 'table' },
 ]
 </script>
 
