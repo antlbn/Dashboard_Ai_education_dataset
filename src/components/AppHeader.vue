@@ -1,14 +1,32 @@
 <script setup lang="ts">
 import { useThemeStore } from '../stores/themeStore'
+import { useUiStore, type ActiveView } from '../stores/uiStore'
 
 defineProps<{ title: string }>()
 
 const theme = useThemeStore()
+const ui = useUiStore()
+
+const tabs: Array<{ label: string; value: ActiveView }> = [
+  { label: 'Обзор', value: 'overview' },
+  { label: 'Распределения', value: 'distributions' },
+]
 </script>
 
 <template>
   <header class="app-header">
     <h1>{{ title }}</h1>
+    <nav class="tabs">
+      <button
+        v-for="tab in tabs"
+        :key="tab.value"
+        class="tab"
+        :class="{ active: ui.activeView === tab.value }"
+        @click="ui.setView(tab.value)"
+      >
+        {{ tab.label }}
+      </button>
+    </nav>
     <button class="theme-toggle" @click="theme.toggle()">
       {{ theme.isDark ? '☀ Light' : '◑ Dark' }}
     </button>
@@ -31,6 +49,33 @@ h1 {
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: auto;
+  margin-left: 1.5rem;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
 
 .theme-toggle {
