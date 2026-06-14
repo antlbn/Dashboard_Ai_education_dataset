@@ -32,8 +32,17 @@ const filteredStudents = computed(() => {
 
     <DataTable :value="filteredStudents" paginator :rows="50" size="small" sortMode="multiple">
       <Column field="Student_ID" header="Student_ID" />
-      <Column field="Weekly_GenAI_Hours" header="Weekly_GenAI_Hours" sortable />
+      <Column field="Weekly_GenAI_Hours" header="Weekly_AI_Hours" sortable />
       <Column field="Paid_Subscription" header="Paid" sortable />
+      <Column field="Major_Category" header="Major_Category" sortable />
+      <Column field="Year_of_Study" header="Year_of_Study" sortable />
+      <Column field="Pre_Semester_GPA" header="Pre_Semester_GPA" sortable />  
+      <Column field="Primary_Use_Case" header="Primary_Use_Case" sortable />
+      <Column field="Prompt_Engineering_Skill" header="Prompt_Engineering_Skill" sortable />
+      <Column field="Tool_Diversity" header="Tool_Diversity" sortable />
+      <Column field="Traditional_Study_Hours" header="Traditional_Study_Hours" sortable />
+      <Column field="Perceived_AI_Dependency" header="Perceived_AI_Dependency" sortable />
+
     </DataTable>
   </div>
 </template>
