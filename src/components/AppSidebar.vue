@@ -58,6 +58,18 @@ const yearOptions: Array<{ label: string; value: Student['Year_of_Study'] | null
   gap: 1.25rem;
 }
 
+@media (max-width: 900px) {
+  .app-sidebar {
+    flex-direction: row;
+    align-items: flex-end;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;

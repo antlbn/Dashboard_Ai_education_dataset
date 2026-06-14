@@ -6,6 +6,8 @@ import GenAIHistogram from '../charts/GenAIHistogram.vue'
 import GPAChangeByMajor from '../charts/GPAChangeByMajor.vue'
 import ScatterGenAIvsGPA from '../charts/ScatterGenAIvsGPA.vue'
 import BurnoutDoughnut from '../charts/BurnoutDoughnut.vue'
+import LowessScatter from '../charts/LowessScatter.vue'
+import GPAChangeByBin from '../charts/GPAChangeByBin.vue'
 
 const filters = useFiltersStore()
 const students = computed(() => filters.filteredStudents)
@@ -74,8 +76,10 @@ const burnoutHighPct = computed(() => {
     <div class="charts-grid">
       <GenAIHistogram />
       <GPAChangeByMajor />
-      <ScatterGenAIvsGPA />
+      <GPAChangeByBin />
       <BurnoutDoughnut />
+      <ScatterGenAIvsGPA />
+      <LowessScatter />
     </div>
 
     <p class="count">Студентов в выборке: {{ students.length }}</p>
@@ -95,6 +99,7 @@ const burnoutHighPct = computed(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
+  width: 50%;
 }
 
 .kpi-card {
@@ -133,6 +138,21 @@ const burnoutHighPct = computed(() => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+}
+
+.charts-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .kpi-grid {
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .count {

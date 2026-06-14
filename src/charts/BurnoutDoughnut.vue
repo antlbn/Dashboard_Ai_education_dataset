@@ -48,7 +48,9 @@ const options = computed(() => {
 <template>
   <div class="chart-card">
     <h3>Уровень выгорания</h3>
-    <Doughnut :data="chartData" :options="options" />
+    <div class="chart-body">
+      <Doughnut :data="chartData" :options="options" />
+    </div>
   </div>
 </template>
 
@@ -66,4 +68,7 @@ h3 {
   color: var(--text-muted);
   margin: 0 0 1rem;
 }
+.chart-body {
+  height: 300px; /* set a fixed height for the chart container */
+} 
 </style>

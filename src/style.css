@@ -31,10 +31,10 @@
   --bg-sidebar: #f0f1f4;
   --border:     #e2e4e9;
   --text:       #1c1e26;
-  --text-muted: #8b8fa8;
-  --text-faint: #b0b3c6;
+  --text-muted: #69696c;
+  --text-faint: #69696c;
   --accent:     #4f67e4;
-  --positive:   #8a9aaa;
+  --positive:   #41668a;
   --negative:   #9a8a8a;
   --warning:    #aaaabc;
 
@@ -42,9 +42,13 @@
   --chart-grid:    #e8e9ed;
   --chart-tick:    #aaaabc;
   --chart-scatter: rgba(140, 140, 155, 0.35);
-  --chart-low:     #b0b8c1;
+  --chart-low:     #41668a;
   --chart-medium:  #c8cdd4;
-  --chart-high:    #9aa0ab;
+  --chart-high:    #ddb1b1;
+}
+
+canvas {
+  max-width: 100%;
 }
 
 body {

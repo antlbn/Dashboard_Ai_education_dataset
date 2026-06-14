@@ -11,18 +11,25 @@ const colors = useChartColors()
 
 const chartData = computed(() => {
   void theme.isDark
-  const bins = Array(10).fill(0)
+  const bins = Array(20).fill(0)
   for (const s of filters.filteredStudents) {
-    const idx = Math.min(Math.floor(s.Weekly_GenAI_Hours / 2), 9)
+    const idx = Math.min(Math.floor(s.Weekly_GenAI_Hours / 2), 19)
     bins[idx]++
   }
+  const labels = Array.from({ length: 20 }, (_, i) => {
+    const start = i * 2
+    const end = (i + 1) * 2
+    return `${start}-${end}`
+  })
+  labels[19] = '38-40+'
   return {
-    labels: ['0-2','2-4','4-6','6-8','8-10','10-12','12-14','14-16','16-18','18+'],
+    labels,
     datasets: [{
       label: 'Студентов',
       data: bins,
       backgroundColor: colors.bar,
-      borderRadius: 2,
+      borderRadius: 1,
+      barPercentage: 1.1 ,
     }],
   }
 })
@@ -31,10 +38,17 @@ const options = computed(() => {
   void theme.isDark
   return {
     responsive: true,
+    maintainAspectRatio: false, // allow chart to fill container height
     plugins: { legend: { display: false } },
     scales: {
-      x: { ticks: { color: colors.tick }, grid: { color: colors.grid } },
-      y: { ticks: { color: colors.tick }, grid: { color: colors.grid } },
+      x: {
+        ticks: { color: colors.tick },
+        grid: { display: false },
+      },
+      y: {
+        ticks: { display: false },
+        grid: { display: false }
+      },
     },
   }
 })
@@ -42,8 +56,10 @@ const options = computed(() => {
 
 <template>
   <div class="chart-card">
-    <h3>GenAI часов/неделю</h3>
-    <Bar :data="chartData" :options="options" />
+     <h3>GenAI часов/неделю</h3>
+    <div class="chart-body">
+      <Bar :data="chartData" :options="options" />
+    </div>
   </div>
 </template>
 
@@ -61,4 +77,8 @@ h3 {
   color: var(--text-muted);
   margin: 0 0 1rem;
 }
+.chart-body {
+  height: 200px; /* set a fixed height for the chart container */
+} 
 </style>
+

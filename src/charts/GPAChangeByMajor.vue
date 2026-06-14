@@ -45,7 +45,9 @@ const options = computed(() => {
 <template>
   <div class="chart-card">
     <h3>Среднее изменение GPA по специальности</h3>
-    <Bar :data="chartData" :options="options" />
+    <div class="chart-body">
+      <Bar :data="chartData" :options="options" />
+    </div>
   </div>
 </template>
 
@@ -63,4 +65,8 @@ h3 {
   color: var(--text-muted);
   margin: 0 0 1rem;
 }
+.chart-body {
+  height: 200px; /* set a fixed height for the chart container */
+  width: 100%; /* ensure the chart fills the width of the container */
+} 
 </style>
