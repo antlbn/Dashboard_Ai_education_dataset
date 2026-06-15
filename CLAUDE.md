@@ -47,7 +47,7 @@ Categorical columns:
 - `Burnout_Risk_Level`: Low, Medium, High
 - `Paid_Subscription`: boolean (`True`/`False` as strings in the CSV)
 
-**Engineered feature:** `GPA_change = Post_Semester_GPA - Pre_Semester_GPA` is the notebook's primary outcome variable. Recompute it in the app rather than treating it as a raw column.
+**Engineered feature:** `GPA_change = Post_Semester_GPA - Pre_Semester_GPA` is the notebook's primary outcome variable. It is **pre-computed during Python preprocessing** and stored in `eda_preprocessed.json` alongside the raw columns — treat it as a regular field, do not recompute it in the app.
 
 ## Key analytical finding (shapes dashboard messaging)
 

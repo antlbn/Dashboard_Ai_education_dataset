@@ -13,7 +13,9 @@ const colors = useChartColors()
 const chartData = computed(() => {
   void theme.isDark
   const all = filters.filteredStudents
-  const sample = all.slice(0, 500)
+  const sampleSize = Math.min(1000, all.length)
+  const step = all.length / sampleSize
+  const sample = Array.from({ length: sampleSize }, (_, i) => all[Math.floor(i * step)])
   const allPoints = all.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change }))
 
   const reg = linearRegression(allPoints)
