@@ -222,7 +222,12 @@ const shareChartOptions = {
           <span v-else>{{ data[c.field] }}</span>
         </template>
         <template #filter="{ filterModel }">
-          <MultiFilter v-model="filterModel.value" :options="c.options" />
+          <MultiFilter
+            v-model="filterModel.value"
+            :options="c.options"
+            :colorMap="BADGE_COLORS[c.field]"
+            :neutralBg="NEUTRAL_BADGE_FIELDS.has(c.field) ? '#9ca3af' : undefined"
+          />
         </template>
       </Column>
 
