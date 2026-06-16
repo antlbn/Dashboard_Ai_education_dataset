@@ -19,15 +19,15 @@ onMounted(() => dataStore.load())
     <template v-if="dataStore.status === 'loading'">
       <div class="state-screen">
         <div class="spinner" />
-        <p>Загружаем данные…</p>
+        <p>Loading data…</p>
       </div>
     </template>
 
     <template v-else-if="dataStore.status === 'error'">
       <div class="state-screen error">
-        <p class="error-title">Не удалось загрузить данные</p>
+        <p class="error-title">Failed to load data</p>
         <p class="error-msg">{{ dataStore.error }}</p>
-        <button @click="dataStore.load()">Попробовать снова</button>
+        <button @click="dataStore.load()">Try again</button>
       </div>
     </template>
 

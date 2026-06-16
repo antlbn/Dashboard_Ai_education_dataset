@@ -47,17 +47,17 @@ const burnoutHighPct = computed(() => {
   <div class="overview">
     <div class="kpi-grid">
       <div class="kpi-card">
-        <span class="kpi-label">Средний GPA (после)</span>
+        <span class="kpi-label">Average GPA (post)</span>
         <span class="kpi-value">{{ avgPostGPA }}</span>
-        <span class="kpi-sub">из 4.0</span>
+        <span class="kpi-sub">out of 4.0</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">GenAI часов/неделю</span>
+        <span class="kpi-label">GenAI hours / week</span>
         <span class="kpi-value">{{ avgGenAIHours }}</span>
-        <span class="kpi-sub">среднее</span>
+        <span class="kpi-sub">average</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">Изменение GPA</span>
+        <span class="kpi-label">GPA change</span>
         <span
           class="kpi-value"
           :class="avgGPAChange !== null && avgGPAChange >= 0 ? 'positive' : 'negative'"
@@ -69,7 +69,7 @@ const burnoutHighPct = computed(() => {
       <div class="kpi-card">
         <span class="kpi-label">Burnout High</span>
         <span class="kpi-value">{{ burnoutHighPct }}</span>
-        <span class="kpi-sub">от выборки</span>
+        <span class="kpi-sub">of sample</span>
       </div>
     </div>
 
@@ -82,7 +82,7 @@ const burnoutHighPct = computed(() => {
       <LowessScatter />
     </div>
 
-    <p class="count">Студентов в выборке: {{ students.length }}</p>
+    <p class="count">Students in sample: {{ students.length }}</p>
   </div>
 </template>
 

@@ -12,6 +12,15 @@ export function linearRegression(data: Point[]) {
     sumX2 += p.x * p.x
   }
 
+  // min/max via a loop — spreading a large array into Math.min/max can blow
+  // the call stack once the dataset grows past the engine's argument limit.
+  let minX = data[0].x
+  let maxX = data[0].x
+  for (const p of data) {
+    if (p.x < minX) minX = p.x
+    if (p.x > maxX) maxX = p.x
+  }
+
   const meanX = sumX / n
   const Sxx   = sumX2 - sumX * sumX / n
   const slope = (sumXY - sumX * sumY / n) / Sxx
@@ -26,8 +35,6 @@ export function linearRegression(data: Point[]) {
   const s2 = sse / (n - 2)
 
   function regressionLine(steps = 60): Point[] {
-    const minX = Math.min(...data.map(p => p.x))
-    const maxX = Math.max(...data.map(p => p.x))
     const step = (maxX - minX) / steps
     return Array.from({ length: steps + 1 }, (_, i) => {
       const x = minX + i * step
@@ -37,8 +44,6 @@ export function linearRegression(data: Point[]) {
 
   // 95% CI for mean response at each x: ŷ ± 1.96 * s * sqrt(1/n + (x-x̄)²/Sxx)
   function confidenceBand(steps = 60): { upper: Point[]; lower: Point[] } {
-    const minX = Math.min(...data.map(p => p.x))
-    const maxX = Math.max(...data.map(p => p.x))
     const step = (maxX - minX) / steps
     const upper: Point[] = []
     const lower: Point[] = []

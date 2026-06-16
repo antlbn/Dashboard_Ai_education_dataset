@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Scatter } from 'vue-chartjs'
-import { useFiltersStore } from '../stores/filtersStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useChartColors } from './useChartColors'
+import ChartCard from '../components/ChartCard.vue'
+import { useThemedChart } from './useThemedChart'
+import { subsample } from './chartHelpers'
 
-const filters = useFiltersStore()
-const theme = useThemeStore()
-const colors = useChartColors()
+const { filters, theme, colors } = useThemedChart()
+
+// Caps: scatter points drawn, and rows fed to the (heavier) LOWESS fit.
+const MAX_SCATTER = 5000
+const MAX_LOWESS = 2000
 
 function lowess(
   xs: number[],
@@ -19,8 +21,12 @@ function lowess(
   if (n < 4) return []
 
   const h = Math.max(4, Math.ceil(frac * n))
-  const xMin = Math.min(...xs)
-  const xMax = Math.max(...xs)
+  let xMin = xs[0]
+  let xMax = xs[0]
+  for (const x of xs) {
+    if (x < xMin) xMin = x
+    if (x > xMax) xMax = x
+  }
 
   const result: Array<{ x: number; y: number }> = []
 
@@ -62,14 +68,8 @@ const chartData = computed(() => {
   void theme.isDark
   const all = filters.filteredStudents
 
-  // subsample for scatter display and LOWESS (capped for perf)
-  const sampleSize = Math.min(all.length, 800)
-  const step = Math.max(1, Math.floor(all.length / sampleSize))
-  const sample = all.filter((_, i) => i % step === 0).slice(0, sampleSize)
-
-  const lowessSize = Math.min(all.length, 2000)
-  const lStep = Math.max(1, Math.floor(all.length / lowessSize))
-  const lwSrc = all.filter((_, i) => i % lStep === 0).slice(0, lowessSize)
+  const sample = subsample(all, MAX_SCATTER)
+  const lwSrc = subsample(all, MAX_LOWESS)
 
   const xs = lwSrc.map(s => s.Weekly_GenAI_Hours)
   const ys = lwSrc.map(s => s.GPA_change)
@@ -78,14 +78,14 @@ const chartData = computed(() => {
   return {
     datasets: [
       {
-        label: 'Студент',
+        label: 'Student',
         data: sample.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change })),
         backgroundColor: colors.scatter,
         pointRadius: 2.5,
         order: 2,
       },
       {
-        label: 'LOWESS тренд',
+        label: 'LOWESS trend',
         data: trend,
         borderColor: 'rgba(220, 50, 50, 0.85)',
         backgroundColor: 'transparent',
@@ -111,7 +111,7 @@ const options = computed(() => {
       tooltip: {
         callbacks: {
           label: (ctx: any) => {
-            if (ctx.dataset.label === 'Студент')
+            if (ctx.dataset.label === 'Student')
               return `GenAI: ${ctx.parsed.x}h, ΔGPA: ${ctx.parsed.y.toFixed(2)}`
             return `LOWESS: ${ctx.parsed.y.toFixed(3)}`
           },
@@ -120,12 +120,12 @@ const options = computed(() => {
     },
     scales: {
       x: {
-        title: { display: true, text: 'GenAI часов/неделю', color: colors.tick },
+        title: { display: true, text: 'GenAI hours / week', color: colors.tick },
         ticks: { color: colors.tick },
         grid: { color: colors.grid },
       },
       y: {
-        title: { display: true, text: 'Изменение GPA (Post − Pre)', color: colors.tick },
+        title: { display: true, text: 'GPA change (Post − Pre)', color: colors.tick },
         ticks: { color: colors.tick },
         grid: { color: colors.grid },
       },
@@ -135,32 +135,10 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="chart-card">
-    <h3>
-      Нелинейный тренд: изменение GPA vs GenAI часы
-      <span class="note">(LOWESS, frac=0.3)</span>
-    </h3>
+  <ChartCard
+    title="Non-linear trend: GPA change vs GenAI hours"
+    note="(LOWESS, frac=0.3)"
+  >
     <Scatter :data="chartData" :options="options" />
-  </div>
+  </ChartCard>
 </template>
-
-<style scoped>
-.chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1.25rem;
-}
-h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 0 0 1rem;
-}
-.note {
-  color: var(--text-faint);
-  text-transform: none;
-  letter-spacing: 0;
-}
-</style>

@@ -8,8 +8,8 @@ const theme = useThemeStore()
 const ui = useUiStore()
 
 const tabs: Array<{ label: string; value: ActiveView }> = [
-  { label: 'Обзор', value: 'overview' },
-  { label: 'Распределения', value: 'distributions' },
+  { label: 'Overview', value: 'overview' },
+  { label: 'Distributions', value: 'distributions' },
   { label: 'Table', value: 'table' },
 ]
 </script>

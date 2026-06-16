@@ -1,32 +1,17 @@
 <script setup lang="ts">
 import { useFiltersStore } from '../stores/filtersStore'
-import type { Student } from '../types/student'
+import { MAJORS, YEARS, withAll } from '../constants'
 
 const filters = useFiltersStore()
 
-const majorOptions: Array<{ label: string; value: Student['Major_Category'] | null }> = [
-  { label: 'Все', value: null },
-  { label: 'Arts', value: 'Arts' },
-  { label: 'Business', value: 'Business' },
-  { label: 'Humanities', value: 'Humanities' },
-  { label: 'Medical', value: 'Medical' },
-  { label: 'STEM', value: 'STEM' },
-]
-
-const yearOptions: Array<{ label: string; value: Student['Year_of_Study'] | null }> = [
-  { label: 'Все', value: null },
-  { label: 'Freshman', value: 'Freshman' },
-  { label: 'Sophomore', value: 'Sophomore' },
-  { label: 'Junior', value: 'Junior' },
-  { label: 'Senior', value: 'Senior' },
-  { label: 'Graduate', value: 'Graduate' },
-]
+const majorOptions = withAll(MAJORS)
+const yearOptions = withAll(YEARS)
 </script>
 
 <template>
   <aside class="app-sidebar">
     <div class="filter-group">
-      <label>Специальность</label>
+      <label>Major</label>
       <select v-model="filters.majorCategory">
         <option v-for="opt in majorOptions" :key="String(opt.value)" :value="opt.value">
           {{ opt.label }}
@@ -35,7 +20,7 @@ const yearOptions: Array<{ label: string; value: Student['Year_of_Study'] | null
     </div>
 
     <div class="filter-group">
-      <label>Курс</label>
+      <label>Year of Study</label>
       <select v-model="filters.yearOfStudy">
         <option v-for="opt in yearOptions" :key="String(opt.value)" :value="opt.value">
           {{ opt.label }}
@@ -43,7 +28,7 @@ const yearOptions: Array<{ label: string; value: Student['Year_of_Study'] | null
       </select>
     </div>
 
-    <button class="reset-btn" @click="filters.reset()">Сбросить</button>
+    <button class="reset-btn" @click="filters.reset()">Reset</button>
   </aside>
 </template>
 

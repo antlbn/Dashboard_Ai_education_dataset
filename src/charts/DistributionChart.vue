@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
-import { useFiltersStore } from '../stores/filtersStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useChartColors } from './useChartColors'
+import ChartCard from '../components/ChartCard.vue'
+import { useThemedChart } from './useThemedChart'
+import { equalWidthBins } from './chartHelpers'
 import type { Student } from '../types/student'
 
 const props = withDefaults(
@@ -20,32 +20,7 @@ const props = withDefaults(
   { bins: 30 },
 )
 
-const filters = useFiltersStore()
-const theme = useThemeStore()
-const colors = useChartColors()
-
-/** Build {labels, counts} for a numeric column via equal-width binning. */
-function numericDistribution(rows: Student[]) {
-  const values = rows.map(r => Number(r[props.column]))
-  if (!values.length) return { labels: [], counts: [] }
-
-  let min = Math.min(...values)
-  let max = Math.max(...values)
-  if (min === max) {
-    // degenerate range — single bucket
-    return { labels: [min.toFixed(1)], counts: [values.length] }
-  }
-
-  const binCount = props.bins
-  const width = (max - min) / binCount
-  const counts = Array(binCount).fill(0)
-  for (const v of values) {
-    const idx = Math.min(Math.floor((v - min) / width), binCount - 1)
-    counts[idx]++
-  }
-  const labels = counts.map((_, i) => (min + i * width).toFixed(1))
-  return { labels, counts }
-}
+const { filters, theme, colors } = useThemedChart()
 
 /** Build {labels, counts} for a categorical column, sorted by frequency. */
 function categoricalDistribution(rows: Student[]) {
@@ -63,7 +38,7 @@ function categoricalDistribution(rows: Student[]) {
 
 const distribution = computed(() =>
   props.type === 'numeric'
-    ? numericDistribution(filters.filteredStudents)
+    ? equalWidthBins(filters.filteredStudents.map(r => Number(r[props.column])), props.bins)
     : categoricalDistribution(filters.filteredStudents),
 )
 
@@ -72,7 +47,7 @@ const chartData = computed(() => {
   return {
     labels: distribution.value.labels,
     datasets: [{
-      label: 'Студентов',
+      label: 'Students',
       data: distribution.value.counts,
       backgroundColor: colors.bar,
       borderRadius: 1,
@@ -102,29 +77,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="chart-card">
-    <h3>{{ title }}</h3>
-    <div class="chart-body">
-      <Bar :data="chartData" :options="options" />
-    </div>
-  </div>
+  <ChartCard :title="title" body-height="200px">
+    <Bar :data="chartData" :options="options" />
+  </ChartCard>
 </template>
-
-<style scoped>
-.chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1.25rem;
-}
-h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 0 0 1rem;
-}
-.chart-body {
-  height: 200px;
-}
-</style>

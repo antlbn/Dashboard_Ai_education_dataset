@@ -1,30 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Doughnut } from 'vue-chartjs'
-import { useFiltersStore } from '../stores/filtersStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useChartColors } from './useChartColors'
+import ChartCard from '../components/ChartCard.vue'
+import { useThemedChart } from './useThemedChart'
+import { BURNOUT_LEVELS } from '../constants'
 
-const filters = useFiltersStore()
-const theme = useThemeStore()
-const colors = useChartColors()
+const { filters, theme, colors } = useThemedChart()
 
 const chartData = computed(() => {
   void theme.isDark
   const students = filters.filteredStudents
   const total = students.length || 1
-  const low    = students.filter(s => s.Burnout_Risk_Level === 'Low').length
-  const medium = students.filter(s => s.Burnout_Risk_Level === 'Medium').length
-  const high   = students.filter(s => s.Burnout_Risk_Level === 'High').length
-
+  const counts = BURNOUT_LEVELS.map(
+    level => students.filter(s => s.Burnout_Risk_Level === level).length,
+  )
   return {
-    labels: [
-      `Low (${((low / total) * 100).toFixed(0)}%)`,
-      `Medium (${((medium / total) * 100).toFixed(0)}%)`,
-      `High (${((high / total) * 100).toFixed(0)}%)`,
-    ],
+    labels: BURNOUT_LEVELS.map(
+      (level, i) => `${level} (${((counts[i] / total) * 100).toFixed(0)}%)`,
+    ),
     datasets: [{
-      data: [low, medium, high],
+      data: counts,
       backgroundColor: [colors.low, colors.medium, colors.high],
       borderWidth: 0,
     }],
@@ -46,29 +41,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="chart-card">
-    <h3>Уровень выгорания</h3>
-    <div class="chart-body">
-      <Doughnut :data="chartData" :options="options" />
-    </div>
-  </div>
+  <ChartCard title="Burnout risk level" body-height="300px">
+    <Doughnut :data="chartData" :options="options" />
+  </ChartCard>
 </template>
-
-<style scoped>
-.chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1.25rem;
-}
-h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 0 0 1rem;
-}
-.chart-body {
-  height: 300px; /* set a fixed height for the chart container */
-} 
-</style>

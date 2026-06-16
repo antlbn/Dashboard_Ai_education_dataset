@@ -8,7 +8,10 @@ export async function loadStudents(): Promise<Student[]> {
 
   if (!result.success) {
     console.error('Validation error:', result.error.flatten())
-    throw new Error('Data validation failed')
+    const first = result.error.issues[0]
+    const where = first?.path.length ? ` at ${first.path.join('.')}` : ''
+    const detail = first ? `${first.message}${where}` : 'unknown issue'
+    throw new Error(`Data validation failed: ${detail} (${result.error.issues.length} issue(s))`)
   }
 
   return result.data

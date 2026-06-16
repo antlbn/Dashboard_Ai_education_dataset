@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { loadStudents } from '../api/loadData'
 import type { Student } from '../types/student'
 
-type Status = 'idle' | 'loading' | 'error'
+type Status = 'idle' | 'loading' | 'ready' | 'error'
 
 export const useDataStore = defineStore('data', () => {
   const students = ref<Student[]>([])
@@ -14,7 +14,7 @@ export const useDataStore = defineStore('data', () => {
     status.value = 'loading'
     try {
       students.value = await loadStudents()
-      status.value = 'idle'
+      status.value = 'ready'
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Unknown error'
       status.value = 'error'

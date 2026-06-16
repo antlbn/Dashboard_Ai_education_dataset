@@ -31,11 +31,11 @@ const categoricalCols: Array<{ column: keyof Student; title: string }> = [
 <template>
   <div class="distributions">
     <p class="intro">
-      Разведочный обзор распределений — формы данных по выборке. Реагирует на
-      фильтры. Не интерпретируется как причинно-следственная связь.
+      Exploratory overview of distributions — the shape of the data across the
+      sample. Responds to filters. Not to be read as causation.
     </p>
 
-    <h2 class="section-title">Числовые признаки</h2>
+    <h2 class="section-title">Numeric features</h2>
     <div class="dist-grid">
       <DistributionChart
         v-for="c in numericCols"
@@ -46,7 +46,7 @@ const categoricalCols: Array<{ column: keyof Student; title: string }> = [
       />
     </div>
 
-    <h2 class="section-title">Категориальные признаки</h2>
+    <h2 class="section-title">Categorical features</h2>
     <div class="dist-grid">
       <DistributionChart
         v-for="c in categoricalCols"
@@ -57,7 +57,7 @@ const categoricalCols: Array<{ column: keyof Student; title: string }> = [
       />
     </div>
 
-    <p class="count">Студентов в выборке: {{ count }}</p>
+    <p class="count">Students in sample: {{ count }}</p>
   </div>
 </template>
 

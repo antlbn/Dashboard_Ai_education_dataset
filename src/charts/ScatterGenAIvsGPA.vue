@@ -1,28 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Scatter } from 'vue-chartjs'
-import { useFiltersStore } from '../stores/filtersStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useChartColors } from './useChartColors'
+import ChartCard from '../components/ChartCard.vue'
+import { useThemedChart } from './useThemedChart'
 import { linearRegression } from './useRegression'
+import { subsample } from './chartHelpers'
 
-const filters = useFiltersStore()
-const theme = useThemeStore()
-const colors = useChartColors()
+const { filters, theme, colors } = useThemedChart()
+
+// Render every point up to this cap; above it we strided-sample for perf.
+const MAX_POINTS = 5000
 
 const chartData = computed(() => {
   void theme.isDark
   const all = filters.filteredStudents
-  const sampleSize = Math.min(1000, all.length)
-  const step = all.length / sampleSize
-  const sample = Array.from({ length: sampleSize }, (_, i) => all[Math.floor(i * step)])
+  const sample = subsample(all, MAX_POINTS)
   const allPoints = all.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change }))
 
   const reg = linearRegression(allPoints)
 
   const datasets: any[] = [
     {
-      label: 'Студент',
+      label: 'Student',
       data: sample.map(s => ({ x: s.Weekly_GenAI_Hours, y: s.GPA_change })),
       backgroundColor: colors.scatter,
       pointRadius: 3,
@@ -62,7 +61,7 @@ const chartData = computed(() => {
 
     // regression line
     datasets.push({
-      label: `Регрессия (slope=${reg.slope.toFixed(4)})`,
+      label: `Regression (slope=${reg.slope.toFixed(4)})`,
       data: line,
       borderColor: 'rgba(220, 50, 50, 0.85)',
       backgroundColor: 'transparent',
@@ -92,7 +91,7 @@ const options = computed(() => {
       tooltip: {
         callbacks: {
           label: (ctx: any) => {
-            if (ctx.dataset.label === 'Студент')
+            if (ctx.dataset.label === 'Student')
               return `GenAI: ${ctx.parsed.x}h, ΔGPA: ${ctx.parsed.y.toFixed(2)}`
             return ctx.dataset.label || ''
           },
@@ -101,12 +100,12 @@ const options = computed(() => {
     },
     scales: {
       x: {
-        title: { display: true, text: 'GenAI часов/неделю', color: colors.tick },
+        title: { display: true, text: 'GenAI hours / week', color: colors.tick },
         ticks: { color: colors.tick },
         grid: { color: colors.grid },
       },
       y: {
-        title: { display: true, text: 'Изменение GPA', color: colors.tick },
+        title: { display: true, text: 'GPA change', color: colors.tick },
         ticks: { color: colors.tick },
         grid: { color: colors.grid },
       },
@@ -116,32 +115,10 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="chart-card">
-    <h3>
-      GenAI часы vs изменение GPA
-      <span class="note">(r ≈ −0.05, связь незначима)</span>
-    </h3>
+  <ChartCard
+    title="GenAI hours vs GPA change"
+    note="(r ≈ −0.05, no meaningful relationship)"
+  >
     <Scatter :data="chartData" :options="options" />
-  </div>
+  </ChartCard>
 </template>
-
-<style scoped>
-.chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1.25rem;
-}
-h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 0 0 1rem;
-}
-.note {
-  color: var(--text-faint);
-  text-transform: none;
-  letter-spacing: 0;
-}
-</style>

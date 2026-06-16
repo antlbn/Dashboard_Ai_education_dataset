@@ -1,13 +1,13 @@
-import { useThemeStore } from '../stores/themeStore'
-
 function cssVar(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
+/**
+ * Reads chart colors from CSS custom properties. The getters are not reactive
+ * by themselves — callers touch `theme.isDark` inside a `computed` so chart
+ * data/options recompute after the theme class on <html> changes.
+ */
 export function useChartColors() {
-  // access isDark to make callers reactive to theme changes
-  useThemeStore().$subscribe(() => {})
-
   return {
     get bar()     { return cssVar('--chart-bar') },
     get grid()    { return cssVar('--chart-grid') },

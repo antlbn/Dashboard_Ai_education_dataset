@@ -1,27 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
-import { useFiltersStore } from '../stores/filtersStore'
-import { useThemeStore } from '../stores/themeStore'
-import { useChartColors } from './useChartColors'
+import ChartCard from '../components/ChartCard.vue'
+import { useThemedChart } from './useThemedChart'
+import { MAJORS } from '../constants'
 
-const filters = useFiltersStore()
-const theme = useThemeStore()
-const colors = useChartColors()
-
-const majors = ['Arts', 'Business', 'Humanities', 'Medical', 'STEM'] as const
+const { filters, theme, colors } = useThemedChart()
 
 const chartData = computed(() => {
   void theme.isDark
-  const values = majors.map(major => {
+  const values = MAJORS.map(major => {
     const group = filters.filteredStudents.filter(s => s.Major_Category === major)
     if (!group.length) return 0
     return group.reduce((acc, s) => acc + s.GPA_change, 0) / group.length
   })
   return {
-    labels: majors as unknown as string[],
+    labels: [...MAJORS],
     datasets: [{
-      label: 'Среднее изменение GPA',
+      label: 'Average GPA change',
       data: values.map(v => +v.toFixed(3)),
       backgroundColor: values.map(v => v >= 0 ? colors.positive : colors.negative),
       borderRadius: 2,
@@ -33,6 +29,7 @@ const options = computed(() => {
   void theme.isDark
   return {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
       x: { ticks: { color: colors.tick }, grid: { color: colors.grid } },
@@ -43,30 +40,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="chart-card">
-    <h3>Среднее изменение GPA по специальности</h3>
-    <div class="chart-body">
-      <Bar :data="chartData" :options="options" />
-    </div>
-  </div>
+  <ChartCard title="Average GPA change by major" body-height="200px">
+    <Bar :data="chartData" :options="options" />
+  </ChartCard>
 </template>
-
-<style scoped>
-.chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1.25rem;
-}
-h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 0 0 1rem;
-}
-.chart-body {
-  height: 200px; /* set a fixed height for the chart container */
-  width: 100%; /* ensure the chart fills the width of the container */
-} 
-</style>
