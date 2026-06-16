@@ -4,14 +4,17 @@ import AppHeader from './components/AppHeader.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import AppContent from './components/AppContent.vue'
 import { useDataStore } from './stores/dataStore'
+import { useUiStore } from './stores/uiStore'
+const ui = useUiStore()
 
 const dataStore = useDataStore()
 onMounted(() => dataStore.load())
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="app-layout" :class="{ 'no-sidebar': ui.activeView === 'table' }">
     <AppHeader title="AI Student Impact Dashboard" />
+
 
     <template v-if="dataStore.status === 'loading'">
       <div class="state-screen">
@@ -29,7 +32,7 @@ onMounted(() => dataStore.load())
     </template>
 
     <template v-else>
-      <AppSidebar />
+      <AppSidebar v-if="ui.activeView !=='table'" />
       <AppContent />
     </template>
   </div>
@@ -57,6 +60,13 @@ onMounted(() => dataStore.load())
     height: auto;
     min-height: 100vh;
   }
+}
+
+.app-layout.no-sidebar {
+  grid-template-areas:
+    "header"
+    "content";
+  grid-template-columns: 1fr;
 }
 
 .state-screen {
