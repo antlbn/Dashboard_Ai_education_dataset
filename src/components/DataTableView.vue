@@ -13,7 +13,9 @@ import {
   MAJORS, YEARS, BURNOUT_LEVELS, USE_CASES, PROMPT_SKILLS, POLICIES, SCALE_1_10,
 } from '../constants'
 import type { Student } from '../types/student'
-import { computed, ref, watch, toRaw } from 'vue'
+import { computed, ref, watch, toRaw, markRaw } from 'vue'
+
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
 import EnumBadge from './EnumBadge.vue'
 import { parseQuery, stringifyQuery, facetSignature, type FacetField } from '../utils/tableQuery'
 
@@ -188,7 +190,28 @@ const shareChartData = computed(() => ({
   }],
 }))
 
-const studentsForTable = computed(() => filteredStudents.value.map(toRaw))
+const sortField = ref<string | null>(null)
+const sortOrder = ref<1 | -1>(1)
+
+function onSort(e: { sortField?: string | ((item: unknown) => string); sortOrder?: number | null }) {
+  sortField.value = typeof e.sortField === 'string' ? e.sortField : null
+  sortOrder.value = e.sortOrder === -1 ? -1 : 1
+}
+
+const studentsForTable = computed(() => {
+  const raw = filteredStudents.value.map(toRaw)
+  const field = sortField.value
+  if (!field) return markRaw(raw)
+  const order = sortOrder.value
+  return markRaw(raw.slice().sort((a, b) => {
+    const av = (a as Record<string, unknown>)[field]
+    const bv = (b as Record<string, unknown>)[field]
+    if (av == null && bv == null) return 0
+    if (av == null) return order
+    if (bv == null) return -order
+    return order * collator.compare(String(av), String(bv))
+  }))
+})
 
 const shareChartOptions = {
   responsive: true,
@@ -227,7 +250,10 @@ const shareChartOptions = {
       paginator
       :rows="50"
       size="small"
-      sortMode="multiple"
+      sortMode="single"
+      :sort-field="sortField ?? undefined"
+      :sort-order="sortOrder"
+      @sort="onSort"
       @value-change="onValueChange"
     >
       <Column field="Student_ID"        header="Student ID"        style="min-width: 6rem" />
