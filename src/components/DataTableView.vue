@@ -16,34 +16,32 @@ import type { Student } from '../types/student'
 import { computed, ref, watch } from 'vue'
 import EnumBadge from './EnumBadge.vue'
 
-// Color maps: bg tint color + optional text override
-type ColorEntry = { bg: string; text?: string }
+// Color maps: badge tint color per enum value (text color is derived in EnumBadge).
+type ColorEntry = { bg: string }
 type ColorMap = Record<string, ColorEntry>
-
-const FIXED_GRAY = '#5a5656'
 
 const BADGE_COLORS: Partial<Record<keyof Student, ColorMap>> = {
   Burnout_Risk_Level: {
-    Low:    { bg: '#a8a89e', text: FIXED_GRAY },
-    Medium: { bg: '#c9b84a', text: FIXED_GRAY },
-    High:   { bg: '#c96060', text: FIXED_GRAY },
+    Low:    { bg: '#a8a89e' },
+    Medium: { bg: '#c9b84a' },
+    High:   { bg: '#c96060' },
   },
   Institutional_Policy: {
-    Actively_Encouraged:   { bg: '#3b82f6', text: FIXED_GRAY },
-    Allowed_With_Citation: { bg: '#06b6d4', text: FIXED_GRAY },
-    Strict_Ban:            { bg: '#dc2626', text: FIXED_GRAY },
+    Actively_Encouraged:   { bg: '#3b82f6' },
+    Allowed_With_Citation: { bg: '#06b6d4' },
+    Strict_Ban:            { bg: '#dc2626' },
   },
   Prompt_Engineering_Skill: {
-    Beginner:     { bg: '#c4bfbf', text: FIXED_GRAY },
-    Intermediate: { bg: '#8a8585', text: FIXED_GRAY },
-    Advanced:     { bg: '#4b4848', text: FIXED_GRAY },
+    Beginner:     { bg: '#c4bfbf' },
+    Intermediate: { bg: '#8a8585' },
+    Advanced:     { bg: '#4b4848' },
   },
   Year_of_Study: {
-    Freshman:  { bg: '#d1cece', text: FIXED_GRAY },
-    Sophomore: { bg: '#b0acac', text: FIXED_GRAY },
-    Junior:    { bg: '#8a8585', text: FIXED_GRAY },
-    Senior:    { bg: '#625e5e', text: FIXED_GRAY },
-    Graduate:  { bg: '#3d3a3a', text: FIXED_GRAY },
+    Freshman:  { bg: '#d1cece' },
+    Sophomore: { bg: '#b0acac' },
+    Junior:    { bg: '#8a8585' },
+    Senior:    { bg: '#625e5e' },
+    Graduate:  { bg: '#3d3a3a' },
   },
 }
 
@@ -211,13 +209,11 @@ const shareChartOptions = {
             v-if="BADGE_COLORS[c.field]?.[String(data[c.field])]"
             :value="String(data[c.field])"
             :color="BADGE_COLORS[c.field]![String(data[c.field])].bg"
-            :textColor="BADGE_COLORS[c.field]![String(data[c.field])].text"
           />
           <EnumBadge
             v-else-if="NEUTRAL_BADGE_FIELDS.has(c.field)"
             :value="String(data[c.field])"
             color="#9ca3af"
-            :textColor="FIXED_GRAY"
           />
           <span v-else>{{ data[c.field] }}</span>
         </template>

@@ -6,12 +6,10 @@ const model = defineModel<Array<string | number> | null>()
 
 const props = defineProps<{
   options: ReadonlyArray<string | number>
-  colorMap?: Record<string, { bg: string; text?: string }>
+  colorMap?: Record<string, { bg: string }>
   neutralBg?: string
-  neutralText?: string
 }>()
 
-const FIXED_GRAY = '#5a5656'
 const search = ref('')
 
 const visibleOptions = computed(() => {
@@ -32,9 +30,7 @@ function isActive(val: string | number) {
 }
 
 function colorFor(val: string | number) {
-  const entry = props.colorMap?.[String(val)]
-  if (entry) return { bg: entry.bg, text: entry.text ?? FIXED_GRAY }
-  return { bg: props.neutralBg ?? '#9ca3af', text: props.neutralText ?? FIXED_GRAY }
+  return props.colorMap?.[String(val)]?.bg ?? props.neutralBg ?? '#9ca3af'
 }
 </script>
 
@@ -55,8 +51,7 @@ function colorFor(val: string | number) {
     >
       <EnumBadge
         :value="String(opt)"
-        :color="colorFor(opt).bg"
-        :textColor="colorFor(opt).text"
+        :color="colorFor(opt)"
       />
     </button>
   </div>
