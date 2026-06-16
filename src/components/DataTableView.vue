@@ -14,6 +14,41 @@ import {
 } from '../constants'
 import type { Student } from '../types/student'
 import { computed, ref, watch } from 'vue'
+import EnumBadge from './EnumBadge.vue'
+
+// Color maps: bg tint color + optional text override
+type ColorEntry = { bg: string; text?: string }
+type ColorMap = Record<string, ColorEntry>
+
+const FIXED_GRAY = '#5a5656'
+
+const BADGE_COLORS: Partial<Record<keyof Student, ColorMap>> = {
+  Burnout_Risk_Level: {
+    Low:    { bg: '#a8a89e', text: FIXED_GRAY },
+    Medium: { bg: '#c9b84a', text: FIXED_GRAY },
+    High:   { bg: '#c96060', text: FIXED_GRAY },
+  },
+  Institutional_Policy: {
+    Actively_Encouraged:   { bg: '#3b82f6', text: FIXED_GRAY },
+    Allowed_With_Citation: { bg: '#06b6d4', text: FIXED_GRAY },
+    Strict_Ban:            { bg: '#dc2626', text: FIXED_GRAY },
+  },
+  Prompt_Engineering_Skill: {
+    Beginner:     { bg: '#c4bfbf', text: FIXED_GRAY },
+    Intermediate: { bg: '#8a8585', text: FIXED_GRAY },
+    Advanced:     { bg: '#4b4848', text: FIXED_GRAY },
+  },
+  Year_of_Study: {
+    Freshman:  { bg: '#d1cece', text: FIXED_GRAY },
+    Sophomore: { bg: '#b0acac', text: FIXED_GRAY },
+    Junior:    { bg: '#8a8585', text: FIXED_GRAY },
+    Senior:    { bg: '#625e5e', text: FIXED_GRAY },
+    Graduate:  { bg: '#3d3a3a', text: FIXED_GRAY },
+  },
+}
+
+// Fields that get a neutral pill shape but no semantic color
+const NEUTRAL_BADGE_FIELDS = new Set<keyof Student>(['Major_Category', 'Primary_Use_Case'])
 
 const store = useDataStore()
 const { students } = storeToRefs(store)
@@ -171,6 +206,21 @@ const shareChartOptions = {
         sortable
         :showFilterMatchModes="false"
       >
+        <template #body="{ data }">
+          <EnumBadge
+            v-if="BADGE_COLORS[c.field]?.[String(data[c.field])]"
+            :value="String(data[c.field])"
+            :color="BADGE_COLORS[c.field]![String(data[c.field])].bg"
+            :textColor="BADGE_COLORS[c.field]![String(data[c.field])].text"
+          />
+          <EnumBadge
+            v-else-if="NEUTRAL_BADGE_FIELDS.has(c.field)"
+            :value="String(data[c.field])"
+            color="#9ca3af"
+            :textColor="FIXED_GRAY"
+          />
+          <span v-else>{{ data[c.field] }}</span>
+        </template>
         <template #filter="{ filterModel }">
           <MultiFilter v-model="filterModel.value" :options="c.options" />
         </template>
