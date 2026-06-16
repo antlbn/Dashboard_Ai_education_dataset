@@ -25,6 +25,11 @@
   --chart-low:     #41668a;
   --chart-medium:  #c8cdd4;
   --chart-high:    #ddb1b1;
+
+  /* PrimeVue overrides */
+  --p-primary-color: #7a7a7e;
+  --p-primary-600: #7a7a7e;
+  --p-primary-700: #7a7a7e;
 }
 
 :root.dark {
@@ -47,6 +52,11 @@
   --chart-low:     #a6e3a1;
   --chart-medium:  #f9e2af;
   --chart-high:    #f38ba8;
+
+  /* PrimeVue overrides */
+  --p-primary-color: #6b6b6f;
+  --p-primary-600: #6b6b6f;
+  --p-primary-700: #6b6b6f;
 }
 
 canvas {

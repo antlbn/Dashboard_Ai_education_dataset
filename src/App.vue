@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from './components/AppHeader.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import AppContent from './components/AppContent.vue'
 import { useDataStore } from './stores/dataStore'
-import { useUiStore } from './stores/uiStore'
-const ui = useUiStore()
 
+const route = useRoute()
 const dataStore = useDataStore()
+
+const isTableView = computed(() => route.path === '/table')
+
 onMounted(() => dataStore.load())
 </script>
 
 <template>
-  <div class="app-layout" :class="{ 'no-sidebar': ui.activeView === 'table' }">
+  <div class="app-layout" :class="{ 'no-sidebar': isTableView }">
     <AppHeader title="AI Student Impact Dashboard" />
-
 
     <template v-if="dataStore.status === 'loading'">
       <div class="state-screen">
@@ -32,7 +34,7 @@ onMounted(() => dataStore.load())
     </template>
 
     <template v-else>
-      <AppSidebar v-if="ui.activeView !=='table'" />
+      <AppSidebar v-if="!isTableView" />
       <AppContent />
     </template>
   </div>

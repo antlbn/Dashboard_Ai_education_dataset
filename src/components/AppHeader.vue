@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { useThemeStore } from '../stores/themeStore'
-import { useUiStore, type ActiveView } from '../stores/uiStore'
 
 defineProps<{ title: string }>()
 
 const theme = useThemeStore()
-const ui = useUiStore()
 
-const tabs: Array<{ label: string; value: ActiveView }> = [
-  { label: 'Overview', value: 'overview' },
-  { label: 'Distributions', value: 'distributions' },
-  { label: 'Table', value: 'table' },
+const tabs = [
+  { label: 'Overview', to: '/' },
+  { label: 'Distributions', to: '/distributions' },
+  { label: 'Table', to: '/table' },
 ]
 </script>
 
@@ -18,15 +16,16 @@ const tabs: Array<{ label: string; value: ActiveView }> = [
   <header class="app-header">
     <h1>{{ title }}</h1>
     <nav class="tabs">
-      <button
+      <router-link
         v-for="tab in tabs"
-        :key="tab.value"
+        :key="tab.to"
+        :to="tab.to"
         class="tab"
-        :class="{ active: ui.activeView === tab.value }"
-        @click="ui.setView(tab.value)"
+        active-class="active"
+        exact-active-class="active"
       >
         {{ tab.label }}
-      </button>
+      </router-link>
     </nav>
     <button class="theme-toggle" @click="theme.toggle()">
       {{ theme.isDark ? '☀ Light' : '◑ Dark' }}
@@ -68,6 +67,7 @@ h1 {
   font-size: 0.85rem;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
+  text-decoration: none;
 }
 
 .tab:hover {
