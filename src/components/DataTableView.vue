@@ -66,19 +66,35 @@ watch(searchText, (val) => {
   debounceTimer = setTimeout(() => { debouncedSearch.value = val }, 300)
 })
 
-// Comma-separated keyword search across the string fields. A "-" prefix excludes.
-// Includes are OR'd; excludes apply across the whole row. "stem, -graduate" =>
-// rows containing "stem" but NOT "graduate" anywhere in the searchable fields.
+// Keyword search across the string fields, Google-style:
+//   comma  -> AND (every clause must match)
+//   |      -> OR within a clause ("stem | medical")
+//   -term  -> exclude rows containing the term anywhere in the searchable fields
+// e.g. "stem | medical, advanced, -graduate"
+//   => (stem OR medical) AND advanced AND NOT graduate
+const searchQuery = computed(() => {
+  const includes: string[][] = [] // OR-groups, all AND'd together
+  const excludes: string[] = []
+  for (const clause of debouncedSearch.value.split(',').map(c => c.trim()).filter(Boolean)) {
+    if (clause.startsWith('-')) {
+      const term = clause.slice(1).trim().toLowerCase()
+      if (term) excludes.push(term)
+    } else {
+      const alts = clause.split('|').map(t => t.trim().toLowerCase()).filter(Boolean)
+      if (alts.length) includes.push(alts)
+    }
+  }
+  return { includes, excludes }
+})
+
 const filteredStudents = computed(() => {
-  const terms = debouncedSearch.value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
-  const excludes = terms.filter(t => t.startsWith('-')).map(t => t.slice(1)).filter(Boolean)
-  const includes = terms.filter(t => !t.startsWith('-'))
+  const { includes, excludes } = searchQuery.value
   if (!includes.length && !excludes.length) return students.value
 
   return students.value.filter(s => {
     const haystack = globalFilterFields.map(f => String(s[f] ?? '')).join(' ').toLowerCase()
     if (excludes.some(t => haystack.includes(t))) return false
-    if (includes.length && !includes.some(t => haystack.includes(t))) return false
+    if (includes.some(group => !group.some(t => haystack.includes(t)))) return false
     return true
   })
 })
@@ -116,7 +132,7 @@ const shareChartOptions = {
       <InputText
         v-model="searchText"
         class="search-input"
-        placeholder="Search — comma-separated keywords, use - to exclude (e.g. stem, medical, -graduate)"
+        placeholder="Search — comma = AND, | = OR, -term excludes (e.g. stem | medical, advanced, -graduate)"
         size="small"
       />
 
