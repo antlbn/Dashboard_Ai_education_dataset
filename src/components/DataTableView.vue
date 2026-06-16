@@ -5,12 +5,15 @@ import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Slider from 'primevue/slider'
 import { FilterMatchMode } from '@primevue/core/api'
+import { Doughnut } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 import { useDataStore } from '../stores/dataStore'
+import { useChartColors } from '../charts/useChartColors'
 import { computed, ref, watch } from 'vue'
 
 const store = useDataStore()
 const { students } = storeToRefs(store)
+const colors = useChartColors()
 
 const paidFilter = ref<boolean | null>(null)
 
@@ -45,6 +48,32 @@ const filteredStudents = computed(() => {
   return students.value.filter(s => s.Paid_Subscription === paidFilter.value)
 })
 
+// total dataset size and number of rows visible after search + column filters
+const totalCount = computed(() => students.value.length)
+const visibleCount = ref(students.value.length)
+function onValueChange(rows: unknown[]) {
+  visibleCount.value = rows.length
+}
+
+const selectedShare = computed(() =>
+  totalCount.value ? (visibleCount.value / totalCount.value) * 100 : 0,
+)
+
+const shareChartData = computed(() => ({
+  datasets: [{
+    data: [visibleCount.value, Math.max(totalCount.value - visibleCount.value, 0)],
+    backgroundColor: [colors.scatter, colors.grid],
+    borderWidth: 0,
+  }],
+}))
+
+const shareChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '60%',
+  plugins: { legend: { display: false }, tooltip: { enabled: false } },
+}
+
 // categorical options
 const majorOptions           = ['Arts', 'Business', 'Humanities', 'Medical', 'STEM']
 const yearOptions            = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
@@ -68,6 +97,17 @@ const toolDiversityOptions   = [...new Set(students.value.map(s => s.Tool_Divers
         <option :value="true">Да</option>
         <option :value="false">Нет</option>
       </select>
+
+      <div class="result-counter">
+        <div class="share-chart">
+          <Doughnut :data="shareChartData" :options="shareChartOptions" />
+        </div>
+        <span>
+          <strong>{{ visibleCount.toLocaleString() }}</strong>
+          из {{ totalCount.toLocaleString() }}
+          <span class="muted">({{ selectedShare.toFixed(1) }}%)</span>
+        </span>
+      </div>
     </div>
 
     <DataTable
@@ -79,6 +119,7 @@ const toolDiversityOptions   = [...new Set(students.value.map(s => s.Tool_Divers
       :rows="50"
       size="small"
       sortMode="multiple"
+      @value-change="onValueChange"
     >
       <Column field="Student_ID"        header="Student ID"        style="min-width: 6rem" />
       <Column field="Paid_Subscription" header="Paid Subscription"  style="min-width: 8rem" sortable />
@@ -204,6 +245,22 @@ const toolDiversityOptions   = [...new Set(students.value.map(s => s.Tool_Divers
 </template>
 
 <style scoped>
+.result-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.result-counter .muted {
+  color: var(--text-muted);
+}
+.share-chart {
+  width: 40px;
+  height: 40px;
+}
+
 :deep(.p-datatable-column-title) {
   white-space: normal;
   line-height: 1.3;
