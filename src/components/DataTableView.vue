@@ -13,7 +13,7 @@ import {
   MAJORS, YEARS, BURNOUT_LEVELS, USE_CASES, PROMPT_SKILLS, POLICIES, SCALE_1_10,
 } from '../constants'
 import type { Student } from '../types/student'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, toRaw } from 'vue'
 import EnumBadge from './EnumBadge.vue'
 import { parseQuery, stringifyQuery, facetSignature, type FacetField } from '../utils/tableQuery'
 
@@ -188,6 +188,8 @@ const shareChartData = computed(() => ({
   }],
 }))
 
+const studentsForTable = computed(() => filteredStudents.value.map(toRaw))
+
 const shareChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -219,7 +221,7 @@ const shareChartOptions = {
     </div>
 
     <DataTable
-      :value="filteredStudents"
+      :value="studentsForTable"
       v-model:filters="filters"
       filterDisplay="menu"
       paginator
