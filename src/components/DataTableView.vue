@@ -161,15 +161,25 @@ watch(parsed, (q) => {
   }
 })
 
-// Facets -> string: when a pill toggle diverges the facet selection from what the
-// string already encodes, rewrite the string canonically (preserving free text).
-// Equal signatures mean the change was string-driven or range-only -> leave as is.
+// Facets -> string: throttled at 150ms so rapid pill clicks don't hammer the URL rewrite.
+let _throttleTimer: ReturnType<typeof setTimeout> | null = null
 watch(filters, () => {
-  const fromFilters = filtersToFacets()
-  const current = parseQuery(searchText.value, FACET_FIELDS)
-  if (facetSignature(fromFilters, FACET_FIELDS) === facetSignature(current.facets, FACET_FIELDS)) return
-  searchText.value = stringifyQuery({ ...current, facets: fromFilters }, FACET_FIELDS)
+  if (_throttleTimer) return
+  _throttleTimer = setTimeout(() => {
+    _throttleTimer = null
+    const fromFilters = filtersToFacets()
+    const current = parseQuery(searchText.value, FACET_FIELDS)
+    if (facetSignature(fromFilters, FACET_FIELDS) === facetSignature(current.facets, FACET_FIELDS)) return
+    searchText.value = stringifyQuery({ ...current, facets: fromFilters }, FACET_FIELDS)
+  }, 150)
 }, { deep: true })
+
+function resetFilters() {
+  searchText.value = ''
+  for (const key of Object.keys(filters.value)) {
+    filters.value[key].value = null
+  }
+}
 
 // total dataset size and number of rows visible after search + column filters
 const totalCount = computed(() => students.value.length)
@@ -232,6 +242,9 @@ const shareChartOptions = {
       />
 
       <div class="result-counter">
+        <button class="reset-btn" title="Reset all filters" @click="resetFilters">
+          ✕ Reset
+        </button>
         <div class="share-chart">
           <Doughnut :data="shareChartData" :options="shareChartOptions" />
         </div>
@@ -282,14 +295,17 @@ const shareChartOptions = {
           />
           <span v-else>{{ data[c.field] }}</span>
         </template>
-        <template #filter="{ filterModel }">
+        <template #filter="{ filterModel, filterCallback }">
           <MultiFilter
             v-model="filterModel.value"
             :options="c.options"
             :colorMap="BADGE_COLORS[c.field]"
             :neutralBg="NEUTRAL_BADGE_FIELDS.has(c.field) ? '#9ca3af' : undefined"
+            @update:modelValue="filterCallback()"
           />
         </template>
+        <template #filterapply><span /></template>
+        <template #filterclear><span /></template>
       </Column>
 
       <!-- numeric: range slider -->
@@ -319,7 +335,24 @@ const shareChartOptions = {
 }
 .search-input {
   flex: 1;
-  min-width: 18rem;
+  min-width: 14rem;
+}
+
+.reset-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.reset-btn:hover {
+  border-color: var(--negative);
+  color: var(--negative);
 }
 .result-counter {
   display: flex;
