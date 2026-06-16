@@ -86,55 +86,55 @@ const toolDiversityOptions   = [...new Set(students.value.map(s => s.Tool_Divers
       <!-- categorical: multiselect -->
       <Column field="Major_Category" header="Major Category" style="min-width: 9rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="majorOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="majorOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Year_of_Study" header="Year of Study" style="min-width: 8rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="yearOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="yearOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Burnout_Risk_Level" header="Burnout Risk" style="min-width: 8rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="burnoutOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="burnoutOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Primary_Use_Case" header="Primary Use Case" style="min-width: 10rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="useCaseOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="useCaseOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Prompt_Engineering_Skill" header="Prompt Engineering Skill" style="min-width: 10rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="promptSkillOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="promptSkillOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Institutional_Policy" header="Institutional Policy" style="min-width: 10rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="policyOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="policyOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Perceived_AI_Dependency" header="AI Dependency" style="min-width: 8rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="dependencyOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="dependencyOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Anxiety_Level_During_Exams" header="Exam Anxiety" style="min-width: 8rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="anxietyOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="anxietyOptions" placeholder="Все" />
         </template>
       </Column>
 
       <Column field="Tool_Diversity" header="Tool Diversity" style="min-width: 8rem" sortable :showFilterMatchModes="false">
         <template #filter="{ filterModel }">
-          <MultiSelect v-model="filterModel.value" appendTo="self" :options="toolDiversityOptions" placeholder="Все" />
+          <MultiSelect v-model="filterModel.value" appendTo="self" filter :options="toolDiversityOptions" placeholder="Все" />
         </template>
       </Column>
 
