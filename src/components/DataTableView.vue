@@ -15,6 +15,7 @@ import {
 import type { Student } from '../types/student'
 import { computed, ref, watch } from 'vue'
 import EnumBadge from './EnumBadge.vue'
+import { parseQuery, stringifyQuery, facetSignature, type FacetField } from '../utils/tableQuery'
 
 // Color maps: badge tint color per enum value (text color is derived in EnumBadge).
 type ColorEntry = { bg: string }
@@ -84,6 +85,22 @@ const globalFilterFields = categoricalCols
   .filter(c => typeof c.options[0] === 'string')
   .map(c => c.field)
 
+// Short aliases used for field-scoped tokens in the query string (e.g. "major:STEM").
+const FACET_ALIASES: Record<string, string> = {
+  Major_Category:             'major',
+  Year_of_Study:              'year',
+  Burnout_Risk_Level:         'burnout',
+  Primary_Use_Case:           'usecase',
+  Prompt_Engineering_Skill:   'skill',
+  Institutional_Policy:       'policy',
+  Perceived_AI_Dependency:    'dependency',
+  Anxiety_Level_During_Exams: 'anxiety',
+  Tool_Diversity:             'tools',
+}
+const FACET_FIELDS: FacetField[] = categoricalCols.map(c => ({
+  field: c.field, alias: FACET_ALIASES[c.field], options: c.options,
+}))
+
 // Build the PrimeVue filter model from the column config (column filters only;
 // global text search is handled manually below in filteredStudents).
 const filters = ref<Record<string, { value: unknown; matchMode: string }>>({
@@ -99,38 +116,58 @@ watch(searchText, (val) => {
   debounceTimer = setTimeout(() => { debouncedSearch.value = val }, 300)
 })
 
-// Keyword search across the string fields, Google-style:
-//   comma  -> AND (every clause must match)
-//   |      -> OR within a clause ("stem | medical")
-//   -term  -> exclude rows containing the term anywhere in the searchable fields
-// e.g. "stem | medical, advanced, -graduate"
-//   => (stem OR medical) AND advanced AND NOT graduate
-const searchQuery = computed(() => {
-  const includes: string[][] = [] // OR-groups, all AND'd together
-  const excludes: string[] = []
-  for (const clause of debouncedSearch.value.split(',').map(c => c.trim()).filter(Boolean)) {
-    if (clause.startsWith('-')) {
-      const term = clause.slice(1).trim().toLowerCase()
-      if (term) excludes.push(term)
-    } else {
-      const alts = clause.split('|').map(t => t.trim().toLowerCase()).filter(Boolean)
-      if (alts.length) includes.push(alts)
-    }
-  }
-  return { includes, excludes }
-})
+// Parsed query string (single source of truth). Field-scoped tokens become facets;
+// the rest is free text. See utils/tableQuery for the grammar.
+const parsed = computed(() => parseQuery(debouncedSearch.value, FACET_FIELDS))
 
+// Manual layer: free-text terms + negated facets. Positive facets are applied by
+// PrimeVue via the synced `filters` model, and numeric ranges by PrimeVue too.
 const filteredStudents = computed(() => {
-  const { includes, excludes } = searchQuery.value
-  if (!includes.length && !excludes.length) return students.value
+  const { freeIncludes, freeExcludes, negatedFacets } = parsed.value
+  const negatedEntries = Object.entries(negatedFacets)
+  if (!freeIncludes.length && !freeExcludes.length && !negatedEntries.length) return students.value
 
   return students.value.filter(s => {
+    for (const [field, values] of negatedEntries) {
+      if (values.some(v => String(s[field as keyof Student]) === String(v))) return false
+    }
     const haystack = globalFilterFields.map(f => String(s[f] ?? '')).join(' ').toLowerCase()
-    if (excludes.some(t => haystack.includes(t))) return false
-    if (includes.some(group => !group.some(t => haystack.includes(t)))) return false
+    if (freeExcludes.some(t => haystack.includes(t))) return false
+    if (freeIncludes.some(group => !group.some(t => haystack.includes(t)))) return false
     return true
   })
 })
+
+// Collect the current positive facet selection from the PrimeVue filter model.
+function filtersToFacets(): Record<string, Array<string | number>> {
+  const facets: Record<string, Array<string | number>> = {}
+  for (const f of FACET_FIELDS) {
+    const v = filters.value[f.field].value as Array<string | number> | null
+    if (v?.length) facets[f.field] = [...v]
+  }
+  return facets
+}
+
+// String -> facets: push parsed positive facets into the PrimeVue filter model.
+// Only write when the selection actually differs, so this never fights typing.
+watch(parsed, (q) => {
+  for (const f of FACET_FIELDS) {
+    const desired = q.facets[f.field] ?? []
+    const current = (filters.value[f.field].value as Array<string | number> | null) ?? []
+    const same = desired.length === current.length && desired.every(v => current.includes(v))
+    if (!same) filters.value[f.field].value = desired.length ? [...desired] : null
+  }
+})
+
+// Facets -> string: when a pill toggle diverges the facet selection from what the
+// string already encodes, rewrite the string canonically (preserving free text).
+// Equal signatures mean the change was string-driven or range-only -> leave as is.
+watch(filters, () => {
+  const fromFilters = filtersToFacets()
+  const current = parseQuery(searchText.value, FACET_FIELDS)
+  if (facetSignature(fromFilters, FACET_FIELDS) === facetSignature(current.facets, FACET_FIELDS)) return
+  searchText.value = stringifyQuery({ ...current, facets: fromFilters }, FACET_FIELDS)
+}, { deep: true })
 
 // total dataset size and number of rows visible after search + column filters
 const totalCount = computed(() => students.value.length)
@@ -165,7 +202,7 @@ const shareChartOptions = {
       <InputText
         v-model="searchText"
         class="search-input"
-        placeholder="Search — comma = AND, | = OR, -term excludes (e.g. stem | medical, advanced, -graduate)"
+        placeholder="Search — field tokens (major:STEM|Business), -field excludes, free text, comma = AND"
         size="small"
       />
 
